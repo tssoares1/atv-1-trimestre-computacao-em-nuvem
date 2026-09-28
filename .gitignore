@@ -1,0 +1,17 @@
+# Variáveis de ambiente com senhas reais
+.env
+
+# Dependências e builds
+node_modules/
+dist/
+
+# Diversos
+*.log
+*.zip
+.DS_Store
+.vscode/
+.idea/
+
+# Documentos da disciplina (entregues à parte)
+*.docx
+*.pdf
