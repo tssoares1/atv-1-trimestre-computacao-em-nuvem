@@ -1,0 +1,8 @@
+node_modules
+dist
+.env
+.git
+frontend.zip
+*.log
+Dockerfile
+.dockerignore
