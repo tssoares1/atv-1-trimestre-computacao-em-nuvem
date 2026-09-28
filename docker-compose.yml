@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - dados:/var/lib/postgresql/data
+      # Executados só na primeira vez (volume vazio): criam as tabelas e os dados de exemplo
+      - ./backend/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./backend/dados.sql:/docker-entrypoint-initdb.d/02-dados.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    ports:
+      - "${API_PORT}:3000"
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Quem chama a API é o navegador (fora da rede do Docker), por isso localhost
+        VITE_API_URL: http://localhost:${API_PORT}
+    ports:
+      - "${WEB_PORT}:4173"
+    depends_on:
+      - backend
+
+volumes:
+  dados:
